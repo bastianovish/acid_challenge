@@ -10,4 +10,4 @@ fi
 #rake db:create
 #rake db:migrate
 
-exec bundle exec "$@"
+exec "$@"

@@ -11,10 +11,10 @@ services:
     env_file:
       - ./backend/.env.development
     depends_on:
-      - postgres
       - redis
     volumes:
-      - ./backend/:/app/
+      - ./backend/:/backend/
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - monitor
 

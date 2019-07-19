@@ -1,14 +1,17 @@
-FROM ruby:2.5
+FROM ruby:2.6.0
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   postgresql-client \
   && rm -rf /var/lib/apt/lists/*
-RUN mkdir /app
-WORKDIR /app
-COPY Gemfile /app/
+RUN mkdir /backend
+WORKDIR /backend
+COPY Gemfile /backend/
 RUN bundle install
-COPY . /app
+COPY . /backend
+
+COPY entrypoint.sh /usr/bin
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
 EXPOSE 3000
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["bundle", "exec","puma","-C","config/puma.rb"]
