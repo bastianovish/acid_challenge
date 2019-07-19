@@ -1,0 +1,27 @@
+version: '3'
+
+networks:
+  monitor:
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./backend/.env.development
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend/:/app/
+    networks:
+      - monitor
+
+  redis:
+    image: redis
+    networks:
+      - monitor
+
+volumes:
+  redis:
