@@ -1,8 +1,8 @@
 # Clase contenedor de Docker
 class Container
   include ActiveModel::Serialization
-
   attr_accessor :id, :stats, :name
+
   def initialize(id, info, stats)
     self.id = id
     self.name = info['Names'].first
@@ -53,11 +53,13 @@ class Container
 
   def block_read
     io = stats['blkio_stats']['io_service_bytes_recursive']
+    return 0 if io.empty?
     io.filter { |a| a['op'] == 'Read' }.first['value'].to_f / (1024 * 1024)
   end
 
   def block_write
     io = stats['blkio_stats']['io_service_bytes_recursive']
+    return 0 if io.empty?
     io.filter { |a| a['op'] == 'Write' }.first['value'].to_f / (1024 * 1024)
   end
 end
