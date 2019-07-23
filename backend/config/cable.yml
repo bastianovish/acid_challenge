@@ -1,10 +1,12 @@
+default: &default
+  adapter: redis
+  url: redis://<%= ENV['REDIS_HOST'] %>:<%= ENV['REDIS_PORT'] %>/1
+
 development:
-  adapter: async
+  <<: *default
 
 test:
   adapter: async
 
 production:
-  adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: backend_production
+  <<: *default

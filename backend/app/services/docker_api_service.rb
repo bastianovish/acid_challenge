@@ -2,7 +2,6 @@
 class DockerApiService
   def self.get_containers
     containers = Docker::Container.all # Obtiene solo los contenedores corriendo por defecto
-    puts "running containers: #{containers.size}"
     stats = {}
     threads = []
     # Obtenemos las stats de cada contenedor corriendo en paralelo

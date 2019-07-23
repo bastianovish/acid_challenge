@@ -6,11 +6,14 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'docker-api', '~> 1.34.2'
 gem 'puma', '~> 3.11'
 gem 'rails', '~> 5.2.3'
+gem 'rack-cors'
+gem 'rake', '~> 12.3.3'
 gem 'redis', '~> 4.0'
+gem 'sidekiq', '~> 5.2.7'
+gem 'sidekiq-scheduler', '~> 3.0.0'
+gem 'sinatra', require: false # Sidekiq Web UI
 gem 'sqlite3'
 
-# Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
-gem 'rack-cors'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
