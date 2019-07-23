@@ -1,12 +1,7 @@
+# Controlador que accede a la API de Docker y obtiene las metricas de los contenedores
 class DockerController < ApplicationController
   def stats
-    containers = Docker::Container.all
-    puts "running containers: #{containers.size}"
-    stats = []
-    containers.each do |container|
-      c = Container.new container.id, container.info, container.stats
-      stats << c.serializable_hash
-    end
-    render json: stats
+    containers = DockerContainer.all
+    render json: containers
   end
 end
