@@ -7,9 +7,10 @@ services:
   dashboard-backend:
     build: ./backend
     container_name: dockerdashboard-backend
-    links:
+    depends_on:
       - redis
     volumes:
+      - ./backend/:/backend/
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - docker-dashboard
@@ -18,42 +19,31 @@ services:
       - 'traefik.enable=true'
       - 'traefik.backend=dashboard-backend'
       - 'traefik.frontend.entryPoints=http'
-      - 'traefik.frontend.rule=Host:api.chi-por.com'
+      - 'traefik.frontend.rule=Host:dashboard-backend.localhost'
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: dashboard-backend
-        awslogs-region: us-east-2
-        awslogs-stream-prefix: ac
 
   dashboard-jobs:
     build: ./backend
     container_name: dockerdashboard-jobs
-    links:
+    depends_on:
       - redis
     command: sidekiq
     restart: always
     volumes:
+      - ./backend/:/backend/
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - docker-dashboard
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: dashboard-jobs
-        awslogs-region: us-east-2
-        awslogs-stream-prefix: ac
 
   dashboard-frontend:
     build: ./frontend
     container_name: dockerdashboard-frontend
-    links:
+    depends_on:
       - dashboard-backend
     networks:
       - docker-dashboard
@@ -62,32 +52,20 @@ services:
       - 'traefik.enable=true'
       - 'traefik.frontend=dashboard-frontend'
       - 'traefik.frontend.entryPoints=http'
-      - 'traefik.frontend.rule=Host:chi-por.com'
+      - 'traefik.frontend.rule=Host:dashboard-frontend.localhost'
     env_file:
-      - ./frontend/.env.production
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: dashboard-frontend
-        awslogs-region: us-east-2
-        awslogs-stream-prefix: ac
+      - ./frontend/.env.production.local
 
   redis:
     image: redis
     networks:
       - docker-dashboard
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: dashboard-redis
-        awslogs-region: us-east-2
-        awslogs-stream-prefix: ac
 
   traefik:
     image: traefik
     container_name: dockerdashboard-traefik
     command: --api --docker
-    links:
+    depends_on:
       - redis
     ports:
       - 80:80
@@ -98,14 +76,8 @@ services:
     networks:
       - docker-dashboard
     labels:
-      - 'traefik.frontend.rule=Host:dashboard.chi-por.com'
+      - 'traefik.frontend.rule=Host:dashboard-metrics.localhost'
       - 'traefik.port=8080'
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: dashboard-backend
-        awslogs-region: us-east-2
-        awslogs-stream-prefix: ac
 
 volumes:
   redis:

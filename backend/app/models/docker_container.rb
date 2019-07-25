@@ -14,7 +14,6 @@ class DockerContainer
     containers.map { |_, container| new(container[:id], container[:info], container[:stats]).serializable_hash }
   end
 
-
   def attributes
     {
       'name' => name, 'cpu_usage' => cpu_usage,

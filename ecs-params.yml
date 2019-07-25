@@ -1,0 +1,18 @@
+version: 1
+task_definition:
+  services:
+    dashboard-backend:
+      cpu_shares: 512
+      mem_limit: '0.5GB'
+    dashboard-jobs:
+      cpu_shares: 512
+      mem_limit: '1GB'
+    dashboard-frontend:
+      cpu_shares: 256
+      mem_limit: '0.25GB'
+    redis:
+      cpu_shares: 512
+      mem_limit: '1GB'
+    traefik:
+      cpu_shares: 256
+      mem_limit: '1GB'

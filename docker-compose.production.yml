@@ -1,0 +1,104 @@
+version: '3'
+networks:
+  docker-dashboard:
+services:
+  dashboard-backend:
+    container_name: dockerdashboard-backend
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    image: bastiansepulvedap/acid_challenge_dashboard-backend:1564030833
+    labels:
+      - traefik.port=3000
+      - traefik.enable=true
+      - traefik.backend=dashboard-backend
+      - traefik.frontend.entryPoints=http
+      - traefik.frontend.rule=Host:api.chi-por.com
+    links:
+      - redis
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: dashboard-backend
+        awslogs-region: us-east-2
+        awslogs-stream-prefix: ac
+    networks:
+      - docker-dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  dashboard-frontend:
+    container_name: dockerdashboard-frontend
+    env_file:
+      - ./frontend/.env.production
+    image: bastiansepulvedap/acid_challenge_dashboard-frontend:1564030833
+    labels:
+      - traefik.port=8000
+      - traefik.enable=true
+      - traefik.frontend=dashboard-frontend
+      - traefik.frontend.entryPoints=http
+      - traefik.frontend.rule=Host:chi-por.com
+    links:
+      - dashboard-backend
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: dashboard-frontend
+        awslogs-region: us-east-2
+        awslogs-stream-prefix: ac
+    networks:
+      - docker-dashboard
+  dashboard-jobs:
+    command: sidekiq
+    container_name: dockerdashboard-jobs
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    image: bastiansepulvedap/acid_challenge_dashboard-jobs:1564030833
+    links:
+      - redis
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: dashboard-jobs
+        awslogs-region: us-east-2
+        awslogs-stream-prefix: ac
+    networks:
+      - docker-dashboard
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  redis:
+    image: redis
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: dashboard-redis
+        awslogs-region: us-east-2
+        awslogs-stream-prefix: ac
+    networks:
+      - docker-dashboard
+  traefik:
+    command: --api --docker
+    container_name: dockerdashboard-traefik
+    image: traefik
+    labels:
+      - traefik.frontend.rule=Host:dashboard.chi-por.com
+      - traefik.port=8080
+    links:
+      - redis
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: dashboard-backend
+        awslogs-region: us-east-2
+        awslogs-stream-prefix: ac
+    networks:
+      - docker-dashboard
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+volumes:
+  redis:
