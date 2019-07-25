@@ -1,27 +1,84 @@
 version: '3'
 
 networks:
-  monitor:
+  docker-dashboard:
 
 services:
-  backend:
+  dashboard-backend:
     build: ./backend
-    ports:
-      - '3000:3000'
-    env_file:
-      - ./backend/.env.development
+    container_name: dockerdashboard-backend
     depends_on:
       - redis
     volumes:
       - ./backend/:/backend/
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - monitor
+      - docker-dashboard
+    labels:
+      - 'traefik.port=3000'
+      - 'traefik.enable=true'
+      - 'traefik.backend=dashboard-backend'
+      - 'traefik.frontend.entryPoints=http'
+      - 'traefik.frontend.rule=Host:dashboard-backend.localhost'
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  dashboard-jobs:
+    build: ./backend
+    container_name: dockerdashboard-jobs
+    depends_on:
+      - redis
+    command: sidekiq
+    restart: always
+    volumes:
+      - ./backend/:/backend/
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - docker-dashboard
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  dashboard-frontend:
+    build: ./frontend
+    container_name: dockerdashboard-frontend
+    depends_on:
+      - dashboard-backend
+    networks:
+      - docker-dashboard
+    labels:
+      - 'traefik.port=8000'
+      - 'traefik.enable=true'
+      - 'traefik.frontend=dashboard-frontend'
+      - 'traefik.frontend.entryPoints=http'
+      - 'traefik.frontend.rule=Host:dashboard-frontend.localhost'
+    environment:
+      - 'REACT_APP_WEBSOCKET_URL=dashboard-backend.localhost/websocket'
+      - 'REACT_APP_API_URL=dashboard-backend.localhost/containers'
 
   redis:
     image: redis
     networks:
-      - monitor
+      - docker-dashboard
+
+  traefik:
+    image: traefik
+    container_name: dockerdashboard-traefik
+    command: --api --docker
+    depends_on:
+      - redis
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - docker-dashboard
+    labels:
+      - 'traefik.frontend.rule=Host:dashboard-metrics.localhost'
+      - 'traefik.port=8080'
 
 volumes:
   redis:

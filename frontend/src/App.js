@@ -1,14 +1,15 @@
-import React, { useReducer } from 'react';
-import { Context, initialState } from './store';
-import { cableReducer } from './modules/cable/cable-reducer';
+import React from 'react';
+import Store from './store';
+import AppBar from './components/AppBar';
 import Dashboard from './pages/Dashboard';
+import rootReducer from './reducers/rootReducer';
+
 const App = () => {
-  const [store, dispatch] = useReducer(cableReducer, initialState);
-  console.log('store', store);
   return (
-    <Context.Provider value={{ store, dispatch }}>
+    <Store rootReducer={rootReducer}>
+      <AppBar />
       <Dashboard />
-    </Context.Provider>
+    </Store>
   );
 };
 
