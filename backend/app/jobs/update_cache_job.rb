@@ -4,6 +4,5 @@ class UpdateCacheJob < ApplicationJob
     puts 'Performing updater job'
     containers = DockerContainer.all
     Rails.cache.write('docker_containers', containers, expires_in: 10.seconds)
-    puts 'containers writed', containers
   end
 end

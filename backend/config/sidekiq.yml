@@ -2,4 +2,4 @@
   UpdateCacheJob:
     every: ['5s', first_in: 0s]
   NotifierJob:
-    every: '9s'
+    every: '10s'

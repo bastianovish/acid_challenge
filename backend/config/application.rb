@@ -21,6 +21,7 @@ module Backend
   class Application < Rails::Application
     config.load_defaults 5.2
     config.action_cable.mount_path = '/websocket'
+    config.action_cable.disable_request_forgery_protection = true
     config.active_job.queue_adapter = :sidekiq
     config.cache_store = :memory_store
     config.api_only = true

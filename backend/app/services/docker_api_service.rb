@@ -10,7 +10,7 @@ class DockerApiService
         s[c.id] = { id: c.id, info: c.info, stats: c.stats }
       end
     end
-    threads.each(&:join)
+    threads.each(&:join) if threads.length > 0
     stats
   end
 end
